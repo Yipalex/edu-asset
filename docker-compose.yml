@@ -1,0 +1,16 @@
+# 固定资产管理系统 — VPS 部署编排
+# 独立于现有 edu-apps，端口 3200，仅绑回环（外部经宝塔 nginx 反代 + HTTPS）
+services:
+  asset:
+    build: .
+    image: edu-asset:latest
+    container_name: edu-asset
+    restart: always
+    env_file: .env
+    ports:
+      - "127.0.0.1:3200:3200"
+    volumes:
+      - ./data:/app/data          # SQLite 数据库持久化
+      - ./uploads:/app/uploads    # 资产照片持久化
+    environment:
+      - TZ=Asia/Shanghai

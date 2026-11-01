@@ -1,0 +1,24 @@
+{
+  "name": "asset-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "教培机构多校区固定资产管理系统",
+  "type": "commonjs",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "ali-oss": "^6.23.0",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.10.0",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
