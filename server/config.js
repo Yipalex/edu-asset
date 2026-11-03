@@ -27,4 +27,6 @@ module.exports = {
   accessTtl: process.env.ACCESS_TOKEN_TTL || '2h',
   refreshTtlDays: parseInt(process.env.REFRESH_TOKEN_TTL_DAYS || '14', 10),
   cookieName: process.env.COOKIE_NAME || 'am_session',
+  // 泽曦工作台统一账号同步密钥（/api/internal/account-sync 的 Bearer 密钥）
+  syncKey: process.env.ZC_SYNC_KEY || '',
 };

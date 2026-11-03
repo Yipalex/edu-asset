@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 // 健康检查
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 // 版本探针：确认线上进程已加载最新代码（每次发布递增）
-const BUILD_VERSION = '2026-10-30.6-status-normal';
+const BUILD_VERSION = '2026-11-03.1-unified-accounts';
 app.get('/api/version', (req, res) => res.json({ version: BUILD_VERSION }));
 app.get('/ready', (req, res) => {
   try {
@@ -44,6 +44,8 @@ app.get('/ready', (req, res) => {
 
 // API 路由
 app.use('/api/auth', require('./routes/auth'));
+// 泽曦工作台统一账号同步（Bearer 密钥，仅 zexi-api 调用；需在超管页配置 ZC_SYNC_KEY）
+app.use('/api/internal', require('./routes/internal'));
 app.use('/api/dicts', require('./routes/dicts'));
 app.use('/api/assets', require('./routes/assets'));
 app.use('/api/purchases', require('./routes/purchases'));
