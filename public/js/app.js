@@ -1,4 +1,4 @@
-// 教培机构固定资产管理系统 — 前端 SPA
+// 泽曦书画固定资产管理系统 — 前端 SPA
 (function () {
   const app = document.getElementById('app');
 
@@ -178,12 +178,12 @@
 
   // ---------- 布局（墨·纸·印 统一骨架 ZXShell） ----------
   const ZX_SYSTEMS = [
-    { id: 'yj',   name: '业绩登记系统', domain: 'yj.example.com',   color: 'var(--zx-sys-yj)',   url: 'https://yj.example.com/' },
-    { id: 'quan', name: '券类管理系统', domain: 'quan.example.com', color: 'var(--zx-sys-quan)', url: 'https://quan.example.com/' },
-    { id: 'jz',   name: '教资报名系统', domain: 'jz.example.com',   color: 'var(--zx-sys-jz)',   url: 'https://jz.example.com/' },
-    { id: 'sf',   name: '评测报告系统', domain: 'sf.example.com',   color: 'var(--zx-sys-sf)',   url: 'https://sf.example.com/' },
-    { id: 'wms',  name: '仓库管理系统', domain: 'wms.example.com',  color: 'var(--zx-sys-wms)',  url: 'https://wms.example.com/' },
-    { id: 'zc',   name: '固定资产管理', domain: 'zc.example.com',   color: 'var(--zx-sys-zc)',   url: 'https://zc.example.com/' },
+    { id: 'yj',   name: '业绩登记系统', domain: 'yj.zexishuhua.com',   color: 'var(--zx-sys-yj)',   url: 'https://yj.zexishuhua.com/' },
+    { id: 'quan', name: '券类管理系统', domain: 'quan.zexishuhua.com', color: 'var(--zx-sys-quan)', url: 'https://quan.zexishuhua.com/' },
+    { id: 'jz',   name: '教资报名系统', domain: 'jz.zexishuhua.com',   color: 'var(--zx-sys-jz)',   url: 'https://jz.zexishuhua.com/' },
+    { id: 'sf',   name: '评测报告系统', domain: 'sf.zexishuhua.com',   color: 'var(--zx-sys-sf)',   url: 'https://sf.zexishuhua.com/' },
+    { id: 'wms',  name: '仓库管理系统', domain: 'wms.zexishuhua.com',  color: 'var(--zx-sys-wms)',  url: 'https://wms.zexishuhua.com/' },
+    { id: 'zc',   name: '固定资产管理', domain: 'zc.zexishuhua.com',   color: 'var(--zx-sys-zc)',   url: 'https://zc.zexishuhua.com/' },
   ];
   const NAV = [
     { group: '总览', items: [
@@ -212,7 +212,7 @@
     if (!u) return;
     zxShellReady = true;
     ZXShell.init({
-      brand: { name: '教培机构', logo: '/logo.jpeg' },
+      brand: { name: '泽曦书画', logo: '/img/zexi-logo.png' },
       systems: ZX_SYSTEMS,
       currentSystem: 'zc',
       nav: NAV,
@@ -246,9 +246,9 @@
   function renderLogin() {
     app.innerHTML = `
       <div class="login-wrap"><div class="login-card">
-        <div class="login-logo"><img src="/logo.jpeg" alt="教培机构"></div>
+        <div class="login-logo"><img src="/img/zexi-logo.png" alt="泽曦书画"></div>
         <h1>固定资产管理系统</h1>
-        <div class="sub">教培机构 · 多校区资产全生命周期管理</div>
+        <div class="sub">泽曦书画 · 多校区资产全生命周期管理</div>
         <input id="login-username" placeholder="手机号 / 用户名" autocomplete="username">
         <input id="login-password" type="password" placeholder="密码" autocomplete="current-password">
         <button class="btn primary btn-block" id="login-btn">登 录</button>
@@ -916,7 +916,7 @@
       const myCampuses = hasR(u, 'admin') ? campuses : campuses.filter((c) => c.id === u.campus_id);
       const m = openModal(`
         <h3>发起盘点任务</h3>
-        <div class="form-row"><label>任务名称 *</label><input id="iv-name" placeholder="如：2026年10月城东校区盘点"></div>
+        <div class="form-row"><label>任务名称 *</label><input id="iv-name" placeholder="如：2026年10月金城校区盘点"></div>
         <div class="form-row"><label>盘点校区 *</label><select id="iv-campus">${myCampuses.map((c) => `<option value="${c.id}">${h(c.name)}</option>`).join('')}</select></div>
         <div class="form-row"><label>截止日期</label><input id="iv-deadline" type="date"></div>
         <div class="modal-actions"><button class="btn" onclick="document.getElementById('modal-mask').remove()">取消</button><button class="btn primary" id="iv-save">发起（自动生成明细）</button></div>`);
@@ -1070,7 +1070,7 @@
       const m = openModal(`
         <h3>${x ? '编辑账号' : '开通账号'}</h3>
         <div class="form-grid">
-          <div class="form-row"><label>登录账号（建议用手机号）*</label><input id="uf2-username" value="${h(x?.username || '')}" ${x ? 'disabled' : ''} placeholder="如：13800000000"></div>
+          <div class="form-row"><label>登录账号（建议用手机号）*</label><input id="uf2-username" value="${h(x?.username || '')}" ${x ? 'disabled' : ''} placeholder="如：18507599754"></div>
           <div class="form-row"><label>姓名 *</label><input id="uf2-name" value="${h(x?.name || '')}"></div>
           <div class="form-row"><label>角色 *</label><select id="uf2-role">${['admin', 'head', 'teacher', 'finance', 'principal'].map((k) => `<option value="${k}" ${x?.role === k ? 'selected' : ''}>${ROLE_NAMES[k]}</option>`).join('')}</select></div>
           <div class="form-row"><label>所属校区</label><select id="uf2-campus"><option value="">—</option>${campuses.map((c) => `<option value="${c.id}" ${x?.campus_id === c.id ? 'selected' : ''}>${h(c.name)}</option>`).join('')}</select></div>
