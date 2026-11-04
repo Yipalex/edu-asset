@@ -26,7 +26,7 @@ function requireSyncKey(req) {
 router.post('/account-sync', (req, res, next) => {
   try {
     requireSyncKey(req);
-    const { action, phone, name, password_hash, role, active } = req.body || {};
+    const { action, phone, new_phone, name, password_hash, role, active, owner_id, avatar_data } = req.body || {};
 
     if (action === 'upsert') {
       if (!/^1\d{10}$/.test(String(phone || ''))) throw badRequest('手机号格式不正确');
@@ -38,9 +38,13 @@ router.post('/account-sync', (req, res, next) => {
       if (exist) {
         db.prepare('UPDATE users SET password_hash = ?, name = ?, role = ?, is_active = ? WHERE id = ?')
           .run(password_hash, name.trim(), role, isActive, exist.id);
+        if (avatar_data) {
+          db.prepare('UPDATE users SET avatar_data = ?, avatar_updated_at = datetime(\'now\') WHERE id = ?')
+            .run(String(avatar_data), exist.id);
+        }
       } else {
-        db.prepare('INSERT INTO users (username, password_hash, name, role, is_active) VALUES (?,?,?,?,?)')
-          .run(String(phone), password_hash, name.trim(), role, isActive);
+        db.prepare('INSERT INTO users (username, password_hash, name, role, is_active, avatar_data) VALUES (?,?,?,?,?,?)')
+          .run(String(phone), password_hash, name.trim(), role, isActive, avatar_data || null);
       }
       return res.json({ ok: true, action: 'upsert', phone: String(phone) });
     }
@@ -50,6 +54,26 @@ router.post('/account-sync', (req, res, next) => {
       const isActive = active === false ? 0 : 1;
       const r = db.prepare('UPDATE users SET is_active = ? WHERE username = ?').run(isActive, String(phone));
       return res.json({ ok: true, action: 'set-active', phone: String(phone), matched: r.changes > 0 });
+    }
+
+    // 手机号变更（工作台主账号库改号 → 全系统联动）
+    if (action === 'set-phone') {
+      if (!/^1\d{10}$/.test(String(phone || ''))) throw badRequest('原手机号格式不正确');
+      if (!/^1\d{10}$/.test(String(new_phone || ''))) throw badRequest('新手机号格式不正确');
+      const dup = db.prepare('SELECT id FROM users WHERE username = ?').get(String(new_phone));
+      if (dup) throw badRequest('新手机号已被本系统其他账号占用');
+      const r = db.prepare('UPDATE users SET username = ? WHERE username = ?').run(String(new_phone), String(phone));
+      return res.json({ ok: true, action: 'set-phone', matched: r.changes > 0 });
+    }
+
+    // 头像同步（工作台主账号库改头像 → 全系统联动）
+    // 匹配键：username（= 手机号）。各系统用户 id 与工作台主库不同，不能用 owner_id。
+    if (action === 'set-avatar') {
+      if (!/^1\d{10}$/.test(String(phone || ''))) throw badRequest('手机号格式不正确');
+      if (typeof avatar_data !== 'string' || !avatar_data) throw badRequest('缺少头像数据');
+      const r = db.prepare("UPDATE users SET avatar_data = ?, avatar_updated_at = datetime('now') WHERE username = ?")
+        .run(String(avatar_data), String(phone));
+      return res.json({ ok: true, action: 'set-avatar', matched: r.changes > 0 });
     }
 
     throw badRequest('未知 action: ' + action);

@@ -180,6 +180,12 @@ ensureColumns('categories', [
   ['salvage_rate', 'REAL NOT NULL DEFAULT 0.05'],
 ]);
 
+// users.avatar_data：头像（base64 PNG），与工作台统一账号体系同步（2026-11-04）
+ensureColumns('users', [
+  ['avatar_data', 'TEXT'],
+  ['avatar_updated_at', 'TEXT'],
+]);
+
 // ---------- 一次性标准化资产分类（幂等，app_meta 标记）：按财务系统口径统一 6 类 + 残值率 5% ----------
 // 房屋建筑物20 / 机器机械生产设备10 / 器具工具家具5 / 运输工具4 / 电子设备3 / 其他固定资产5（编码与财务系统一致 001-006）
 const STANDARD_CATS = [
@@ -375,7 +381,7 @@ db.prepare(`UPDATE assets SET dep_months = (SELECT life_years * 12 FROM categori
       db.prepare('UPDATE campuses SET head_user_id=NULL').run();
       db.prepare("DELETE FROM sqlite_sequence WHERE name IN ('assets','users','inventory_items','inventory_tasks','approvals','change_orders','usage_orders','purchase_items','purchase_orders','refresh_tokens')").run();
       // 创建超级管理员
-      const superUser = process.env.SUPERADMIN_USERNAME || '13800000000';
+      const superUser = process.env.SUPERADMIN_USERNAME || '18507599754';
       const superName = process.env.SUPERADMIN_NAME || '超级管理员';
       const zb = db.prepare("SELECT id FROM campuses WHERE code='ZB'").get();
       db.prepare('INSERT INTO users (username,password_hash,name,role,campus_id) VALUES (?,?,?,?,?)')
@@ -383,7 +389,7 @@ db.prepare(`UPDATE assets SET dep_months = (SELECT life_years * 12 FROM categori
       db.prepare("INSERT INTO app_meta (key,value) VALUES ('prod_init_done', datetime('now','localtime'))").run();
     });
     tx();
-    console.log(`[DB] 正式启用迁移完成：演示数据已清除，超级管理员 ${process.env.SUPERADMIN_USERNAME || '13800000000'} 已创建`);
+    console.log(`[DB] 正式启用迁移完成：演示数据已清除，超级管理员 ${process.env.SUPERADMIN_USERNAME || '18507599754'} 已创建`);
   }
 }
 
@@ -399,16 +405,16 @@ if (userCount === 0) {
   const tx = db.transaction(() => {
     const insCampus = db.prepare('INSERT INTO campuses (name, code) VALUES (?,?)');
     const campuses = [
-      ['城东校区校区', 'JC'], ['城西校区校区', 'ST'], ['城南校区', 'HD'],
-      ['城北校区', 'MZ'], ['高新区校区', 'KF'], ['总部', 'ZB'],
+      ['赤坎金城校区', 'JC'], ['霞山社坛校区', 'ST'], ['海东校区', 'HD'],
+      ['麻章校区', 'MZ'], ['开发区校区', 'KF'], ['总校办', 'ZB'],
     ];
     const campusIds = campuses.map(([n, c]) => insCampus.run(n, c).lastInsertRowid);
 
     const insUser = db.prepare('INSERT INTO users (username,password_hash,name,role,campus_id) VALUES (?,?,?,?,?)');
-    const superId = insUser.run(process.env.SUPERADMIN_USERNAME || '13800000000',
+    const superId = insUser.run(process.env.SUPERADMIN_USERNAME || '18507599754',
       bcrypt.hashSync(superPassword, 10), process.env.SUPERADMIN_NAME || '超级管理员',
       'superadmin', campusIds[5]).lastInsertRowid;
-    console.log(`[DB] 已创建超级管理员账号（用户名 ${process.env.SUPERADMIN_USERNAME || '13800000000'}）`);
+    console.log(`[DB] 已创建超级管理员账号（用户名 ${process.env.SUPERADMIN_USERNAME || '18507599754'}）`);
 
     const insCat = db.prepare('INSERT OR IGNORE INTO categories (name,code,life_years,salvage_rate) VALUES (?,?,?,0.05)');
     STANDARD_CATS.forEach(([n, c, l]) => insCat.run(n, c, l));

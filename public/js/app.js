@@ -200,7 +200,7 @@
     { group: '系统', items: [
       { id: 'users', icon: 'users', label: '用户与权限', href: '#/users', roles: ['superadmin'] },
       { id: 'admin', icon: 'settings', label: '基础数据', href: '#/admin', roles: ['superadmin', 'admin'] },
-      { id: 'pwd', icon: 'me', label: '修改密码', href: 'javascript:void(0)' },
+      { id: 'profile', icon: 'me', label: '个人资料', href: 'javascript:void(0)' },
       { id: 'more', icon: 'more', label: '更多', href: '#/more', roles: ['superadmin', 'admin', 'head', 'teacher', 'finance', 'principal'] },
     ]},
   ];
@@ -212,14 +212,20 @@
     if (!u) return;
     zxShellReady = true;
     ZXShell.init({
-      brand: { name: '泽曦书画', logo: '/img/zexi-logo.png' },
+      brand: { name: '泽曦书画', logo: '/img/zexi-logo.png?v=20261104d' },
       systems: ZX_SYSTEMS,
       currentSystem: 'zc',
       nav: NAV,
       tabbar: ['dashboard', 'assets', 'todo', 'inventory', 'more'],
-      user: { name: u.name, role: ROLE_NAMES[u.role] || u.role, roleType: u.role },
+      user: {
+        name: u.name,
+        role: ROLE_NAMES[u.role] || u.role,
+        roleType: u.role,
+        avatarUrl: u.avatar_url || null,
+        href: 'javascript:void(0)',
+      },
       activeNav: '',
-      onNavigate: (id) => { if (id === 'pwd') { changePasswordForm(); return false; } },
+      onNavigate: (id) => { if (id === 'profile') { profileForm(); return false; } },
       onLogout: () => api.logout(),
     });
   }
@@ -246,7 +252,7 @@
   function renderLogin() {
     app.innerHTML = `
       <div class="login-wrap"><div class="login-card">
-        <div class="login-logo"><img src="/img/zexi-logo.png" alt="泽曦书画"></div>
+        <div class="login-logo"><img src="/img/zexi-logo.png?v=20261104d" alt="泽曦书画"></div>
         <h1>固定资产管理系统</h1>
         <div class="sub">泽曦书画 · 多校区资产全生命周期管理</div>
         <input id="login-username" placeholder="手机号 / 用户名" autocomplete="username">
@@ -1098,6 +1104,59 @@
   }
 
   // ---------- 修改本人密码 ----------
+  /* ==================== 个人资料（头像 / 姓名 / 手机号 / 密码） ==================== */
+  function profileForm() {
+    const u = api.getUser() || {};
+    const m = openModal(`
+      <h3>👤 个人资料</h3>
+      <div id="zxProfileRoot"></div>
+      <div class="modal-actions"><button class="btn" onclick="document.getElementById('modal-mask').remove()">关闭</button></div>`);
+    const root = m.querySelector('#zxProfileRoot');
+    if (!window.ZXProfile) { root.textContent = '资料组件加载失败'; return; }
+    ZXProfile.render(root, {
+      app: 'zc',
+      apiPrefix: '/api/auth',
+      phoneField: 'username',
+      toast: (msg, kind) => toast(msg, kind === 'ok'),
+      token: () => sessionStorage.getItem('am_at'),
+      userId: () => u.id,
+      name: () => u.name || '',
+      phone: () => u.username || '',
+      roleLabel: () => ROLE_NAMES[u.role] || u.role,
+      avatarUrl: (id, v) => (id ? `/api/auth/avatars/${id}` + (v ? `?v=${v}` : '') : ''),
+      // zc 上传头像用 JSON base64（后端接口与其他系统不同）
+      uploadAvatar: (blob) => new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => {
+          api.post('/api/auth/avatar', { avatar: fr.result })
+            .then(resolve)
+            .catch((e) => reject(new Error(e.message || '头像上传失败')));
+        };
+        fr.onerror = () => reject(new Error('图片读取失败'));
+        fr.readAsDataURL(blob);
+      }),
+      saveProfile: (payload) => api.post('/api/auth/profile', payload),
+      changePassword: (payload) => api.post('/api/auth/change-password', payload),
+      onSaved: (uu) => {
+        if (uu && uu.name) { u.name = uu.name; }
+        refreshShellUser();
+      },
+      onAvatar: () => refreshShellUser(),
+    });
+  }
+
+  /** 刷新顶栏/侧栏用户信息（改头像/改名后调用） */
+  function refreshShellUser() {
+    if (!window.ZXShell || !zxShellReady) return;
+    const u = api.getUser() || {};
+    ZXShell.setUser({
+      name: u.name || '',
+      role: ROLE_NAMES[u.role] || u.role,
+      roleType: u.role,
+      avatarUrl: u.avatar_url || null,
+    });
+  }
+
   function changePasswordForm() {
     const m = openModal(`
       <h3>🔑 修改密码</h3>

@@ -1,4 +1,4 @@
-/* 教培机构固定资产管理系统 —— 应用层样式（墨·纸·印 统一设计语言）
+/* 泽曦书画固定资产管理系统 —— 应用层样式（墨·纸·印 统一设计语言）
    骨架（顶栏/侧导航/底部标签栏）由 zx/shell 提供，本文件只管业务组件。
    业务 JS 里的类名不变，仅重写 CSS 定义。 */
 * { -webkit-tap-highlight-color: transparent; }
@@ -31,7 +31,7 @@ input, select, textarea { font-family: inherit; font-size: var(--zx-fs-body); }
   box-shadow: var(--zx-shadow-float);
 }
 .login-logo { text-align: center; margin-bottom: 12px; }
-.login-logo img { width: 72px; height: 72px; object-fit: contain; border-radius: 14px; }
+.login-logo img { width: 88px; height: 88px; object-fit: contain; border-radius: 0; }
 .login-card h1 {
   font-family: var(--zx-font-display); font-size: var(--zx-fs-title);
   text-align: center; margin: 0 0 4px; color: var(--zx-ink);
